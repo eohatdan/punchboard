@@ -4,6 +4,7 @@ const movesDisplay = document.getElementById('moves');
 const clueDisplay = document.getElementById('clue');
 const leaderboard = document.getElementById('top-scores');
 const resetButton = document.getElementById('reset-game');
+const pauseButton = document.getElementById('pause-game');
 
 let timer = 0;
 let moves = 0;
@@ -12,26 +13,36 @@ let ultimatePrizeLocation;
 let clues;
 let currentClueIndex = 0;
 let startTime;
+let isPaused = false;
+let randomStart;
 
-const prizeOrder = [0, 22, 34, 45, 57, 78, 99]; // Sample sequence to follow
-const cluesText = [
-    "Start in the top left corner!",
-    "Move two steps to the right.",
-    "Move down to the third row.",
-    "Find the center!",
-    "Head to the bottom row.",
-    "Back to the left!",
-    "End in the bottom right corner for the prize!"
-];
+// Randomize the starting position of the puzzle
+function getRandomStart() {
+    return Math.floor(Math.random() * 100);
+}
 
+// Set up the game with updated starting logic
 function setupGame() {
     gameBoard.innerHTML = "";
     currentClueIndex = 0;
     moves = 0;
     timer = 0;
+    randomStart = getRandomStart();
     clearInterval(gameInterval);
     startTime = Date.now();
     gameInterval = setInterval(updateTimer, 1000);
+
+    // Define the order and clues based on a random starting position
+    prizeOrder = [randomStart, randomStart + 12, randomStart + 22, randomStart + 33, randomStart + 45, randomStart + 67, randomStart + 89].map(num => num % 100);
+    cluesText = [
+        "Start at a random position!",
+        "Move two steps to the right.",
+        "Move down to the third row.",
+        "Find the center!",
+        "Head to the bottom row.",
+        "Back to the left!",
+        "End in the bottom right corner for the prize!"
+    ];
 
     // Create a 10x10 punchboard grid
     for (let i = 0; i < 100; i++) {
@@ -49,7 +60,10 @@ function setupGame() {
     updateMoves();
 }
 
+// Corrected logic for handling the punch and advancing to the next clue
 function handlePunch(index, punchElement) {
+    if (isPaused) return;
+
     if (index === clues[currentClueIndex]) {
         punchElement.classList.add('clicked');
         moves++;
@@ -66,19 +80,24 @@ function handlePunch(index, punchElement) {
     }
 }
 
+// Display the next clue
 function updateClue() {
     clueDisplay.innerText = `Clue: ${cluesText[currentClueIndex]}`;
 }
 
+// Timer functionality with pause capability
 function updateTimer() {
-    timer = Math.floor((Date.now() - startTime) / 1000);
-    timerDisplay.innerText = `Time: ${timer} seconds`;
+    if (!isPaused) {
+        timer = Math.floor((Date.now() - startTime) / 1000);
+        timerDisplay.innerText = `Time: ${timer} seconds`;
+    }
 }
 
 function updateMoves() {
     movesDisplay.innerText = `Moves: ${moves}`;
 }
 
+// Winning the game and saving the score
 function gameWon() {
     clearInterval(gameInterval);
     clueDisplay.innerText = "Congratulations! You've found the ultimate prize!";
@@ -86,6 +105,7 @@ function gameWon() {
     displayLeaderboard();
 }
 
+// Saving the score and updating the leaderboard
 function saveScore() {
     const scores = JSON.parse(localStorage.getItem('rallyeScores') || '[]');
     scores.push({ time: timer, moves });
@@ -93,6 +113,7 @@ function saveScore() {
     localStorage.setItem('rallyeScores', JSON.stringify(scores.slice(0, 3))); // Keep top 3
 }
 
+// Displaying the leaderboard
 function displayLeaderboard() {
     const scores = JSON.parse(localStorage.getItem('rallyeScores') || '[]');
     leaderboard.innerHTML = "";
@@ -102,6 +123,18 @@ function displayLeaderboard() {
         leaderboard.appendChild(li);
     });
 }
+
+// Pause functionality
+pauseButton.addEventListener('click', () => {
+    isPaused = !isPaused;
+    pauseButton.innerText = isPaused ? "Resume" : "Pause";
+    if (isPaused) {
+        clearInterval(gameInterval);
+    } else {
+        startTime = Date.now() - timer * 1000;
+        gameInterval = setInterval(updateTimer, 1000);
+    }
+});
 
 resetButton.addEventListener('click', setupGame);
 
