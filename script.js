@@ -35,7 +35,7 @@ function setupGame() {
     // Define the order and clues based on a random starting position
     prizeOrder = [randomStart, randomStart + 12, randomStart + 22, randomStart + 33, randomStart + 45, randomStart + 67, randomStart + 89].map(num => num % 100);
     cluesText = [
-        "Start at a random position!",
+        "Start at the highlighted position!",
         "Move two steps to the right.",
         "Move down to the third row.",
         "Find the center!",
@@ -49,6 +49,12 @@ function setupGame() {
         const punch = document.createElement('button');
         punch.classList.add('punch');
         punch.innerText = "Push";
+        
+        // Highlight the starting position
+        if (i === randomStart) {
+            punch.classList.add('starting');
+        }
+        
         punch.addEventListener('click', () => handlePunch(i, punch));
         gameBoard.appendChild(punch);
     }

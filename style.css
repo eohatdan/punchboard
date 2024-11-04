@@ -37,3 +37,8 @@ body {
     padding: 10px 20px;
     font-size: 1em;
 }
+/* Highlight for the starting punch */
+.punch.starting {
+    background-color: #FFA500; /* Distinct color for starting point */
+    border: 3px solid #FFD700; /* Thicker border to stand out */
+}
