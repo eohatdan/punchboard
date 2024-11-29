@@ -68,7 +68,7 @@ function setupGame() {
 
 // Corrected logic for handling the punch and advancing to the next clue
 function handlePunch(index, punchElement) {
-    console.log(index,punchElement);
+    console.log("handlePunch called with index:", index); // This should log every time a punch is clicked
     if (isPaused) return;
 
     if (index === clues[currentClueIndex]) {
