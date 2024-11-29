@@ -23,6 +23,7 @@ function getRandomStart() {
 
 // Set up the game with updated starting logic
 function setupGame() {
+    console.log("Setting up the game..."); // Debugging log
     gameBoard.innerHTML = "";
     currentClueIndex = 0;
     moves = 0;
