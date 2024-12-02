@@ -29,6 +29,7 @@ function setupGame() {
     moves = 0;
     timer = 0;
     randomStart = getRandomStart();
+    console.log("RandomStart: ",randomStart;
     clearInterval(gameInterval);
     startTime = Date.now();
     gameInterval = setInterval(updateTimer, 1000);
