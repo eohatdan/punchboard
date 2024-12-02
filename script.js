@@ -29,7 +29,7 @@ function setupGame() {
     currentClueIndex = 0;
     moves = 0;
     timer = 0;
-    randomStart = getRandomStart();
+    randomStart = getRandomStart());
     console.log("RandomStart: ",randomStart;
     clearInterval(gameInterval);
     startTime = Date.now();
