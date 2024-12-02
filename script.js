@@ -15,66 +15,91 @@ let currentClueIndex = 0;
 let startTime;
 let isPaused = false;
 let randomStart;
+const boardSize = 10; // Assuming a 10x10 grid
 
 // Randomize the starting position of the puzzle
 function getRandomStart() {
-    console.log("Entering getRandomStart function...");
-    return Math.floor(Math.random() * 100);
+    return Math.floor(Math.random() * (boardSize * boardSize));
 }
 
-// Set up the game with updated starting logic
+// Calculate a new position based on dx and dy
+function calculatePosition(currentPos, dx, dy, boardSize) {
+    const currentRow = Math.floor(currentPos / boardSize);
+    const currentCol = currentPos % boardSize;
+
+    const newRow = currentRow + dy;
+    const newCol = currentCol + dx;
+
+    // Ensure the new position is within the grid boundaries
+    if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize) {
+        return newRow * boardSize + newCol; // Convert (row, col) back to 1D index
+    }
+    return null; // Invalid move
+}
+
 function setupGame() {
-    console.log("Setting up the game..."); // Debugging log
+    console.log("Setting up the game...");
     gameBoard.innerHTML = "";
     currentClueIndex = 0;
     moves = 0;
     timer = 0;
     randomStart = getRandomStart();
-    console.log("RandomStart: ",randomStart);
     clearInterval(gameInterval);
     startTime = Date.now();
     gameInterval = setInterval(updateTimer, 1000);
 
-    // Define the order and clues based on a random starting position
-    prizeOrder = [randomStart, randomStart + 12, randomStart + 22, randomStart + 33, randomStart + 45, randomStart + 67, randomStart + 89].map(num => num % 100);
-    cluesText = [
-        "Start at the highlighted position!",
-        "Move two steps to the right.",
-        "Move down to the third row.",
-        "Find the center!",
-        "Head to the bottom row.",
-        "Back to the left!",
-        "End in the bottom right corner for the prize!"
+    prizeOrder = [];
+    cluesText = [];
+
+    // Add the starting position
+    prizeOrder.push(randomStart);
+    cluesText.push("Start at the highlighted position!");
+
+    // Dynamically add the next positions and clues
+    let currentPos = randomStart;
+
+    const movesSequence = [
+        { dx: 2, dy: 0, clue: "Move two steps to the right." },
+        { dx: 0, dy: 2, clue: "Move down two rows." },
+        { dx: -3, dy: 0, clue: "Move three steps to the left." },
+        { dx: 0, dy: -1, clue: "Move up one row." },
     ];
 
-    // Create a 10x10 punchboard grid
-    for (let i = 0; i < 100; i++) {
+    movesSequence.forEach(move => {
+        const nextPos = calculatePosition(currentPos, move.dx, move.dy, boardSize);
+        if (nextPos !== null) {
+            prizeOrder.push(nextPos);
+            cluesText.push(move.clue);
+            currentPos = nextPos;
+        }
+    });
+
+    // Ensure ultimate prize is the last position
+    ultimatePrizeLocation = prizeOrder[prizeOrder.length - 1];
+
+    // Create the game board
+    for (let i = 0; i < boardSize * boardSize; i++) {
         const punch = document.createElement('button');
         punch.classList.add('punch');
         punch.innerText = "Push";
-        
-        // Highlight the starting position
+
+        // Highlight starting position
         if (i === randomStart) {
             punch.classList.add('starting');
         }
-        
+
         punch.addEventListener('click', () => handlePunch(i, punch));
         gameBoard.appendChild(punch);
     }
 
-    // Initialize clues and ultimate prize
-    ultimatePrizeLocation = prizeOrder[prizeOrder.length - 1];
-    clues = [...prizeOrder];
     updateClue();
     updateMoves();
 }
 
-// Corrected logic for handling the punch and advancing to the next clue
 function handlePunch(index, punchElement) {
-    console.log("handlePunch called with index:", index); // This should log every time a punch is clicked
     if (isPaused) return;
 
-    if (index === clues[currentClueIndex]) {
+    if (index === prizeOrder[currentClueIndex]) {
         punchElement.classList.add('clicked');
         moves++;
         currentClueIndex++;
@@ -90,12 +115,10 @@ function handlePunch(index, punchElement) {
     }
 }
 
-// Display the next clue
 function updateClue() {
     clueDisplay.innerText = `Clue: ${cluesText[currentClueIndex]}`;
 }
 
-// Timer functionality with pause capability
 function updateTimer() {
     if (!isPaused) {
         timer = Math.floor((Date.now() - startTime) / 1000);
@@ -107,7 +130,6 @@ function updateMoves() {
     movesDisplay.innerText = `Moves: ${moves}`;
 }
 
-// Winning the game and saving the score
 function gameWon() {
     clearInterval(gameInterval);
     clueDisplay.innerText = "Congratulations! You've found the ultimate prize!";
@@ -115,7 +137,6 @@ function gameWon() {
     displayLeaderboard();
 }
 
-// Saving the score and updating the leaderboard
 function saveScore() {
     const scores = JSON.parse(localStorage.getItem('rallyeScores') || '[]');
     scores.push({ time: timer, moves });
@@ -123,7 +144,6 @@ function saveScore() {
     localStorage.setItem('rallyeScores', JSON.stringify(scores.slice(0, 3))); // Keep top 3
 }
 
-// Displaying the leaderboard
 function displayLeaderboard() {
     const scores = JSON.parse(localStorage.getItem('rallyeScores') || '[]');
     leaderboard.innerHTML = "";
@@ -134,7 +154,6 @@ function displayLeaderboard() {
     });
 }
 
-// Pause functionality
 pauseButton.addEventListener('click', () => {
     isPaused = !isPaused;
     pauseButton.innerText = isPaused ? "Resume" : "Pause";
@@ -148,5 +167,5 @@ pauseButton.addEventListener('click', () => {
 
 resetButton.addEventListener('click', setupGame);
 
-setupGame(); // Initialize the game on load
+setupGame();
 displayLeaderboard();
