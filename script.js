@@ -18,6 +18,7 @@ let randomStart;
 
 // Randomize the starting position of the puzzle
 function getRandomStart() {
+    console.log("Entering getRandomStart function...");
     return Math.floor(Math.random() * 100);
 }
 
