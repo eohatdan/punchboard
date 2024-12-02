@@ -38,6 +38,7 @@ function calculatePosition(currentPos, dx, dy, boardSize) {
 }
 
 function setupGame() {
+    console.log("12/3/24 Version.");
     console.log("Setting up the game...");
     gameBoard.innerHTML = "";
     currentClueIndex = 0;
