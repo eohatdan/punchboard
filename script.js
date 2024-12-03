@@ -37,8 +37,39 @@ function calculatePosition(currentPos, dx, dy, boardSize) {
     return null; // Invalid move
 }
 
+// Generate math-based clues dynamically
+function generateMathClues() {
+    const operations = ['+', '-', '*', '/'];
+    const clues = [];
+    const positions = [];
+    let currentPos = randomStart;
+
+    for (let i = 0; i < 5; i++) {
+        // Generate random components for the math expression
+        const a = Math.floor(Math.random() * 9) + 1; // 1-9
+        const b = Math.floor(Math.random() * 9) + 1; // 1-9
+        const operator = operations[Math.floor(Math.random() * operations.length)];
+
+        // Build the math expression
+        const expression = `${a}${operator}(${b}+${b})`;
+        const result = eval(expression);
+
+        // Calculate next position
+        const dx = Math.floor(result) % boardSize;
+        const dy = Math.floor(result / boardSize);
+        const nextPos = calculatePosition(currentPos, dx, dy, boardSize);
+
+        if (nextPos !== null) {
+            clues.push(`Solve: ${expression} to determine the next move.`);
+            positions.push(nextPos);
+            currentPos = nextPos;
+        }
+    }
+
+    return { clues, positions };
+}
+
 function setupGame() {
-    console.log("12/3/24 Version.");
     console.log("Setting up the game...");
     gameBoard.innerHTML = "";
     currentClueIndex = 0;
@@ -49,31 +80,10 @@ function setupGame() {
     startTime = Date.now();
     gameInterval = setInterval(updateTimer, 1000);
 
-    prizeOrder = [];
-    cluesText = [];
-
-    // Add the starting position
-    prizeOrder.push(randomStart);
-    cluesText.push("Start at the highlighted position!");
-
-    // Dynamically add the next positions and clues
-    let currentPos = randomStart;
-
-    const movesSequence = [
-        { dx: 2, dy: 0, clue: "Move two steps to the right." },
-        { dx: 0, dy: 2, clue: "Move down two rows." },
-        { dx: -3, dy: 0, clue: "Move three steps to the left." },
-        { dx: 0, dy: -1, clue: "Move up one row." },
-    ];
-
-    movesSequence.forEach(move => {
-        const nextPos = calculatePosition(currentPos, move.dx, move.dy, boardSize);
-        if (nextPos !== null) {
-            prizeOrder.push(nextPos);
-            cluesText.push(move.clue);
-            currentPos = nextPos;
-        }
-    });
+    // Generate dynamic clues and positions
+    const { clues: generatedClues, positions } = generateMathClues();
+    prizeOrder = [randomStart, ...positions];
+    cluesText = ["Start at the highlighted position!", ...generatedClues];
 
     // Ensure ultimate prize is the last position
     ultimatePrizeLocation = prizeOrder[prizeOrder.length - 1];
