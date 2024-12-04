@@ -1,26 +1,40 @@
 body {
     font-family: Arial, sans-serif;
-    text-align: center;
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
 }
 
-#game-info {
-    margin: 20px;
+#main-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
 }
 
-.game-board {
+#game-board {
     display: grid;
-    grid-template-columns: repeat(10, 50px);
-    gap: 10px;
-    justify-content: center;
+    grid-template-columns: repeat(10, 30px); /* Adjust for smaller circles */
+    gap: 5px; /* Space between circles */
+    margin: 20px;
+    flex-grow: 1;
 }
 
 .punch {
-    width: 50px;
-    height: 50px;
+    width: 30px;
+    height: 30px;
     background-color: #FF6F61;
     color: white;
     font-weight: bold;
     cursor: pointer;
+    border-radius: 50%; /* Makes the buttons circular */
+    border: 2px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
 }
 
 .punch.clicked {
@@ -28,17 +42,29 @@ body {
     cursor: default;
 }
 
-#leaderboard {
-    margin-top: 20px;
+.punch.starting {
+    background-color: #FFA500;
+    border: 3px solid #FFD700;
 }
 
-#reset-game {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 1em;
+#side-panel {
+    width: 300px;
+    background-color: #f4f4f4;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
-/* Highlight for the starting punch */
-.punch.starting {
-    background-color: #FFA500; /* Distinct color for starting point */
-    border: 3px solid #FFD700; /* Thicker border to stand out */
+
+#feedback {
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+#buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
